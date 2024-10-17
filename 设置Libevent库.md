@@ -515,22 +515,3 @@ void libevent_global_shutdown(void);
 调用 `libevent_global_shutdown()` 将使其他 Libevent 函数表现得不可预测；除了作为程序调用的最后一个 Libevent 函数外，不要调用它。一个例外是，`libevent_global_shutdown()` 是幂等的：即使它已经被调用，您也可以再次调用它。
 
 该函数在 `<event2/event.h>` 中声明。它是在 Libevent 2.1.1-alpha 中引入的。
-
-# 释放全局 Libevent 结构
-
-即使您已释放所有通过 Libevent 分配的对象，仍然会有一些全局分配的结构剩下。这通常不是问题：一旦进程退出，它们都会被清理掉。但是，存在这些结构可能会让一些调试工具误认为 Libevent 正在泄漏资源。如果您需要确保 Libevent 已释放所有内部库全局数据结构，可以调用：
-
-## 接口
-
-```c
-void libevent_global_shutdown(void);
-```
-
-此函数不会释放任何由 Libevent 函数返回给您的结构。如果您希望在退出前释放所有内容，您需要自己释放所有事件、事件基础（event_bases）、缓冲事件（bufferevents）等。
-
-调用 `libevent_global_shutdown()` 将使其他 Libevent 函数表现得不可预测；除了作为程序调用的最后一个 Libevent 函数外，不要调用它。一个例外是，`libevent_global_shutdown()` 是幂等的：即使它已经被调用，您也可以再次调用它。
-
-该函数在 `<event2/event.h>` 中声明。它是在 Libevent 2.1.1-alpha 中引入的。
-```
-
-您可以直接复制并粘贴以上内容到 Markdown 编辑器或支持 Markdown 格式的环境中。
