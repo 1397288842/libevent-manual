@@ -1,0 +1,108 @@
+# Libevent参考手册：初步概述
+
+## Libevent概述
+
+Libevent是一个用于编写快速、可移植的非阻塞I/O的库。它的设计目标包括：
+
+- **可移植性**  
+  使用Libevent编写的程序应能在所有Libevent支持的平台上运行。即使在没有很好的非阻塞I/O方法的情况下，Libevent也应该支持一些较差的方法，以便程序能够在受限的环境中运行。
+
+- **速度**  
+  Libevent努力使用每个平台上可用的最快非阻塞I/O实现，并且在此过程中不引入过多的开销。
+
+- **可扩展性**  
+  Libevent旨在良好地支持需要处理成千上万个活动套接字的程序。
+
+- **便利性**  
+  在可能的情况下，使用Libevent编写程序的最自然方式应是稳定且可移植的。
+
+## Libevent的组成部分
+
+- **evutil**  
+  抽象出不同平台网络实现之间差异的通用功能。
+
+- **event和event_base**  
+  Libevent的核心，提供一个抽象API，支持各种平台特定的基于事件的非阻塞I/O后端。它可以让您知道何时套接字准备好读取或写入，提供基本的超时功能，并检测操作系统信号。
+
+- **bufferevent**  
+  这些函数为Libevent的事件驱动核心提供了更方便的封装。它们允许您的应用程序请求缓冲读取和写入，而不是在套接字准备好进行I/O时通知您，而是在I/O实际发生时通知您。
+
+  bufferevent接口还具有多个后端，以便利用提供更快非阻塞I/O方法的系统，例如Windows IOCP API。
+
+- **evbuffer**  
+  该模块实现了底层bufferevent的缓冲区，并提供高效和/或便利的访问功能。
+
+- **evhttp**  
+  一个简单的HTTP客户端/服务器实现。
+
+- **evdns**  
+  一个简单的DNS客户端/服务器实现。
+
+- **evrpc**  
+  一个简单的RPC实现。
+
+## 库
+
+当构建Libevent时，默认情况下安装以下库：
+
+- **libevent_core**  
+  包含所有核心事件和缓冲区功能。该库包含所有event_base、evbuffer、bufferevent和实用函数。
+
+- **libevent_extra**  
+  此库定义了您可能需要或不需要的特定于协议的功能，包括HTTP、DNS和RPC。
+
+- **libevent**  
+  该库出于历史原因而存在；它包含libevent_core和libevent_extra的内容。您不应该使用它；它可能在未来版本的Libevent中被删除。
+
+以下库仅在某些平台上安装：
+
+- **libevent_pthreads**  
+  此库基于pthreads可移植线程库添加了线程和锁实现。它与libevent_core分开，以便您不需要在不使用Libevent的多线程方式时链接pthreads。
+
+- **libevent_openssl**  
+  此库支持使用bufferevents和OpenSSL库进行加密通信。它与libevent_core分开，以便您不需要在不使用加密连接时链接OpenSSL。
+
+## 头文件
+
+所有当前的公共Libevent头文件安装在event2目录下。头文件分为三大类：
+
+- **API头文件**  
+  API头文件定义了当前公共接口的Libevent。这些头文件没有特殊后缀。
+
+- **兼容性头文件**  
+  兼容性头文件包含已弃用函数的定义。除非您正在将程序从旧版本的Libevent移植，否则不应包含它。
+
+- **结构头文件**  
+  这些头文件定义了相对不稳定布局的结构。有些暴露是因为您需要快速访问结构组件；有些是出于历史原因。直接依赖于头文件中的任何结构可能会在与其他版本的Libevent的二进制兼容性上导致问题，有时可能很难调试。这些头文件具有后缀"_struct.h"。
+
+（还有较旧版本的Libevent头文件，没有event2目录。请参见下面的“如果您必须使用旧版本的Libevent”）。
+
+## 如果您必须使用旧版本的Libevent
+
+Libevent 2.0修订了其API，以使其通常更合理且不易出错。如果可能，您应该编写新程序以使用Libevent 2.0 API。但有时您可能需要使用旧API，无论是更新现有应用程序，还是支持由于某种原因无法安装Libevent 2.0或更高版本的环境。
+
+旧版本的Libevent头文件较少，并且没有安装在“event2”下：
+
+| 旧头文件 | 替代为当前头文件 |
+| --- | --- |
+| event.h | event2/event*.h，event2/buffer*.h，event2/bufferevent*.h，event2/tag*.h |
+| evdns.h | event2/dns*.h |
+| evhttp.h | event2/http*.h |
+| evrpc.h | event2/rpc*.h |
+| evutil.h | event2/util*.h |
+
+在Libevent 2.0及更高版本中，旧头文件仍然作为新头文件的包装器存在。
+
+关于使用旧版本的一些其他说明：
+
+- 在1.4之前，只有一个库“libevent”，该库包含当前分为libevent_core和libevent_extra的功能。
+
+- 在2.0之前，没有支持锁的功能；Libevent可以是线程安全的，但前提是您确保不同时在两个线程中使用同一个结构。
+
+下面的各个部分将讨论您可能在特定代码库中遇到的过时API。
+
+## 版本状态说明
+
+在1.4.7之前的Libevent版本应被视为完全过时。在1.3e之前的Libevent版本应被视为存在严重错误。
+
+（另外，请不要向Libevent维护者发送1.4.x或更早版本的新功能请求——它应保持稳定版本。如果您在1.3x或更早版本中遇到错误，请确保它在最新的稳定版本中仍然存在，然后再报告它：后续版本的发布是出于某种原因）。
