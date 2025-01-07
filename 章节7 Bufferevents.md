@@ -630,7 +630,7 @@ void bufferevent_unlock(struct bufferevent *bufev);
 
 ### 废弃的 bufferevent 功能
 
-在 Libevent 1.4 和 Libevent 2.0 之间，bufferevent 后端代码经历了重大修订。在旧接口中，通常可以通过访问 `struct bufferevent` 的内部结构来构建，并使用依赖于此访问的宏。
+在 Libevent 1.4 和 Libevent 2.0 之间，bufferevent 底层代码经历了重大修订。在旧接口中，通常可以通过访问 `struct bufferevent` 的内部结构来构建，并使用依赖于此访问的宏。
 
 为了使事情变得混乱，旧代码有时使用以“evbuffer”为前缀的名称来描述 bufferevent 的功能。
 
